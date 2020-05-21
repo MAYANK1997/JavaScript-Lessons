@@ -1,1 +1,155 @@
+Foundatoin of Asysnchrounous Concept 
+Use of settimeout
 
+settimeout(()=>console.log("1"), 1);
+console.log("2");
+
+result: 2 then 1
+Synchronous : Finish each task before switching to the next
+Now with an asynchronous model, you don’t have to wait for each task to finish to move onto the next. You can start the washing machine and do the groceries while your clothes are being washed. By the time you come back from the grocery store, your clothes are washed. Now if you need to dry your clothes, you can put them in the dryer and cook dinner while your clothes are being dried.
+
+function getData(options) {
+  var finalResult;
+  asyncTask(options, function(err, result) {
+    finalResult = result;
+  });
+  return finalResult;
+}
+getData(); // -> returns undefined
+
+
+function getData(options, callback) {
+  asyncTask(options, callback);
+}
+getData({}, function(err, result) {
+  if(err) return console.log(err);
+  return console.log(result);
+});
+
+Now, it could get messy if you have a lot of async operations that depend on each other. In that case, it’s better to name each callback function and define them separately to avoid confusion:
+
+const fs = require('fs');
+fs.readFile('file.txt', 'utf-8', readCb);
+
+function readCb(err, content) {
+  if (err) {
+    return console.log(err);
+  }
+  return fs.writeFile('copy.txt', content, writeCb);
+}
+
+function writeCb(err) {
+  if(err) {
+    return console.log(err);
+  }
+  return console.log('Done');
+}
+
+A promise is an object that represents the result of an asynchronous operation that may or may not succeed when executed at some point in the future. For example, when you make a request to an API server, you can return a promise that would represent the result of the api call. The api call may or may not succeed, but eventually you will get a promise object that you can use. The function below performs an api call and returns the result in the form of a promise:
+
+
+const axios = require('axios'); // A
+function getDataFromServer() {
+  const result = axios.get('https://jsonplaceholder.typicode.com/posts/1'); // B
+  return result; // C
+}
+
+    On line A, we load the axios module which is a promise-based http client
+    On line B, we make a GET request to a public api endpoint and store the result in the result constant
+    On line C, we return the promise
+    
+    
+ Now, we can simply call the function and access the results and catch possible errors:
+
+getDataFromServer()
+  .then(function(response) {
+    console.log(response);
+  })
+  .catch(function(error) {
+    console.log(error);
+  });
+
+Every promise has a then and a catch method. You would use the then method to capture the result of the operation if it succeeds (resolved promise), and the catch method if the operation fails (rejected promise). Note that both then and catch receive a callback function with a single argument to capture the result. Also, it's worth noting that both of these methods return a promise that allows us to potentially chain them.
+
+
+We can create a promise using the global Promise constructor:
+
+const myPromise = new Promise();
+
+The promise constructor takes a callback function with two arguments. The first argument is used to resolve or capture the result of an asynchronous operation, and the second is used to capture errors:
+
+const myPromise = new Promise(function(resolve, reject) {
+  if(someError) {
+    reject(new Error(someError));
+  } else {
+    resolve('ok');
+  }
+});
+
+And as mentioned before, we can use the then method to use the results when the promise is resolved, and the catch method to handle errors:
+
+myPromise
+  .then(function(result) {
+    console.log(result);
+  })
+  .catch(function(error) {
+    console.log(error);
+  });
+const fs = require('fs');
+function readFile(file, format = 'utf-8') {
+  return new Promise((resolve, reject) => {
+    fs.readFile(file, format, (err, content) => {
+      if(err) return reject(err);
+      resolve(content);
+    });
+  });
+}
+
+
+readFile('./example.txt')
+  .then(content => console.log(content))
+  .catch(err => console.log(err));
+  
+Even more concisely we can re write the code above using the util.promisify method that was introduced in Node 8:
+
+// code/promises/promisify-example.js
+const fs = require('fs');
+const util = require('util');
+const readFile = util.promisify(fs.readFile);
+
+readFile('./example.txt', 'utf-8')
+  .then(content => console.log(content))
+  .catch(err => console.log(err));
+  
+  
+When a function is marked as an async function, the returned value will always be wrapped in a promise.
+
+const add = async (a, b) => a + b;
+Now when we call the function we will get a promise that wraps the actual value. To access the actual value we use the then method and read the value through the callback argument:
+
+const result = add(1, 2);
+result.then(function(sum) {
+  console.log(sum);
+});
+
+The await operator can only be used inside an async function. When you place the await operator behind an asynchronous operation, the execution is "paused" until the result is available. Let's say that we want to read the content of a file and wait until we have the content. Then we want to write the content to another file only after the read operation has completed. To do that we can define an async function readWrite that awaits on each task in the body of the function:
+
+async function readWrite() {
+  const content = await readFile('./example.txt', 'utf-8');
+  const result = await writeFile('./example-copy.txt', content);
+  return result;
+}
+
+The readWrite function is marked async which means we can use the await operator in the function body. On line 1 we wait until reading the content of the file is finished. And then on line 2 we write to the file and then wait until it's finished. On line 3 we simply return the result of the write operation.
+
+
+async function main() {
+  const response = await axios.get('https://jsonplaceholder.typicode.com/posts/1');
+  const postBody = response.data.body;
+  const localFolderList = await readdir('.');
+  const textFiles = localFolderList.filter(onlyTextFiles);
+  const localFileContent = await readFile(textFiles[0], 'utf-8');
+  const finalResult = localFileContent + postBody;
+  const writeResult = await writeFile('./final.txt', finalResult);
+  return writeResult;
+}
