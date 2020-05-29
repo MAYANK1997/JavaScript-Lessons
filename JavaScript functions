@@ -1,0 +1,99 @@
+Array Methods
+const myArray = [1,2,3,4,5];
+map()
+// increase each element in the array by 1 
+myArray.map(mp=>mp+1);
+// it return array with values [2,3,4,5,6]
+
+
+filter()
+// filter out all the array elements greater than 2
+myArray.filter(el=>el>2);
+//return a new Array [3,4,5]
+
+reduce()
+// sum of all the numbers in the array
+
+myArray.reduce((accumulator, currentValue) =>{
+accumulator+currentValue;
+
+},0);
+// Answer is 15
+// 0 is the starting value of the accumulator
+find()
+myArray.find(el => el===5);
+//returns 5 so it extracts those value from the array after matching the function conditions 
+
+
+includes()
+// Checks existence of element in the array
+myArray.includes(3);
+//return true
+
+
+Promises:
+
+
+To avoid callback hell we have promises introduced as it works perfectly with asynchronous requests
+
+example 
+
+const myPromise = new Promise((resolve,reject) => {
+if(true){
+setTimeout(()=>{
+resolve(console.log("I have passed !"));
+
+},1000);
+}
+else{
+reject(console.log('I have failed'));
+}
+
+});
+
+myPromise
+.then(value => value)
+.catch(rejectValue => rejectValue);
+
+
+
+
+Async Request to an API
+
+Using fetch
+
+fetch('apiUrl')
+.then(response => response.json())
+.then(json(console.log(json))
+.catch(error => console.log(' I have Error);
+
+
+Async Await simplifies the request pulling than writing long promises
+
+const myAsynfunction = async () => {
+try{
+
+const userResponse = await fetch('url');
+
+const users = userResponse.json();
+
+const secondUser = users[1];
+
+console.log(secondUser);
+
+const postResponse = async fetch('');
+const posts = await postResponse.json();
+console.log(posts);
+}
+
+
+
+catch(err){
+
+console.log(err);
+}
+
+
+
+}
+
